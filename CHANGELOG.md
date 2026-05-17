@@ -1,0 +1,10 @@
+# Changelog
+
+## [0.1.0-beta.1-wip]
+
+### Added
+
+- Initial release.
+- `tracedGitlabCI<T>(...)` — wraps a otel_gitlab_ci call in a CLIENT-kind span
+  with vendor-specific attributes.
+- Zone-scoped suppression via `runWithoutGitlabCIInstrumentation()` / `Async()`.
