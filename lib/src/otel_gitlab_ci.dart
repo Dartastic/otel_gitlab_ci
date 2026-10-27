@@ -1,11 +1,12 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_gitlab_ci_suppression.dart';
 
 class GitlabCIResult {
+  /// Creates a result.
   const GitlabCIResult({
     this.instance,
     this.projectId,
@@ -45,8 +46,13 @@ class GitlabCIResult {
   final String? errorMessage;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class GitlabCICallResult<T> {
+  /// Creates a call result.
   const GitlabCICallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final GitlabCIResult? result;
 }
@@ -54,95 +60,100 @@ class GitlabCICallResult<T> {
 Future<T> tracedGitlabCI<T>({
   required String operation,
   required Future<GitlabCICallResult<T>> Function() invoke,
-  Tracer? tracer,
+  APITracer? tracer,
 }) async {
   if (gitlabCIInstrumentationSuppressed()) {
     final r = await invoke();
     return r.value;
   }
-  final t = tracer ?? OTel.tracerProvider().getTracer('otel_gitlab_ci');
+  final t = tracer ?? OTelAPI.tracerProvider().getTracer('otel_gitlab_ci');
   final span = t.startSpan('gitlabci $operation', kind: SpanKind.client);
   try {
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.system', 'gitlab')]));
-    span.addAttributes(
-        OTel.attributes([OTel.attributeString('cicd.platform', 'gitlab')]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.system', 'gitlab')]));
+    span.addAttributes(OTelAPI.attributes(
+        [OTelAPI.attributeString('cicd.platform', 'gitlab')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.instance != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('gitlab.instance', res.instance!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('gitlab.instance', res.instance!)]));
       }
       if (res.projectId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('gitlab.project.id', res.projectId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('gitlab.project.id', res.projectId!)]));
       }
       if (res.projectPath != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('gitlab.project.path', res.projectPath!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('gitlab.project.path', res.projectPath!)
+        ]));
       }
       if (res.pipelineId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.pipeline.run.id', res.pipelineId!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('cicd.pipeline.run.id', res.pipelineId!)
+        ]));
       }
       if (res.pipelineSource != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('cicd.pipeline.run.cause', res.pipelineSource!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'cicd.pipeline.run.cause', res.pipelineSource!)
         ]));
       }
       if (res.pipelineStatus != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('cicd.pipeline.run.state', res.pipelineStatus!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'cicd.pipeline.run.state', res.pipelineStatus!)
         ]));
       }
       if (res.jobId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.run.id', res.jobId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.run.id', res.jobId!)]));
       }
       if (res.jobName != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.name', res.jobName!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.name', res.jobName!)]));
       }
       if (res.jobStage != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.group', res.jobStage!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.group', res.jobStage!)]));
       }
       if (res.jobStatus != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.run.state', res.jobStatus!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.run.state', res.jobStatus!)]));
       }
       if (res.runnerId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.worker.id', res.runnerId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.worker.id', res.runnerId!)]));
       }
       if (res.runnerDescription != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('cicd.worker.name', res.runnerDescription!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('cicd.worker.name', res.runnerDescription!)
         ]));
       }
       if (res.branch != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('vcs.ref.head.name', res.branch!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('vcs.ref.head.name', res.branch!)]));
       }
       if (res.commit != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('vcs.ref.head.revision', res.commit!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('vcs.ref.head.revision', res.commit!)]));
       }
       if (res.statusCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('http.response.status_code', res.statusCode!)
+        ]));
       }
       if (res.errorCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('gitlabci.error.code', res.errorCode!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('gitlabci.error.code', res.errorCode!)]));
       }
       final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
-              ErrorResource.errorType.key, res.errorCode ?? 'gitlabci.error')
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              ErrorAttributes.errorType.key, res.errorCode ?? 'gitlabci.error')
         ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
