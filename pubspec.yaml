@@ -2,7 +2,7 @@ name: otel_gitlab_ci
 description: >-
   OpenTelemetry instrumentation for gitlab_ci by Dartastic.io. Adds standard
   OpenTelemetry observability to applications that use gitlab_ci.
-version: 0.1.0-wip
+version: 0.1.0
 repository: https://github.com/dartastic/otel_gitlab_ci
 homepage: https://dartastic.io
 
